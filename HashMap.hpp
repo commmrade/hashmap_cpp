@@ -29,7 +29,7 @@ public:
     void insert(const Key &key, const Value &val) {
         size_t index = hashFunc(key);
         for (auto &[k, v] : map[index]) {
-            if (k == key) {
+            if (k == key) { //If  key exists update value
                 v = val;
                 return;
             }
@@ -37,7 +37,8 @@ public:
 
         if (map[index].empty()) {
             bucket_count++;
-        }
+        } //If there is no bucket at this position - "create it"
+
         map[index].push_front({key, val});
         element_count++;
 
@@ -49,16 +50,16 @@ public:
         size_t index = hashFunc(key);
 
         for (auto b = map[index].begin(); b != map[index].end(); b++) {
-            auto &[k, v] = *b;
+            auto &[k, val] = *b; //structured binding
 
             if (k == key) {
-                if (map[index].size() == 1) {
+                if (map[index].size() == 1) { //if no collisions
                     map[index].clear();
                     element_count--;
                     bucket_count--;
                     break;
                 }
-                map[index].erase(b);
+                map[index].erase(b); //if collisions
                 element_count--;
                 break;
             }
@@ -66,18 +67,18 @@ public:
     }
 
     void rehash(size_t new_capacity) {
-        std::vector<std::list<std::pair<Key, Value>>> temp_map;
+        std::vector<std::list<std::pair<Key, Value>>> temp_map; //temp vector
         temp_map.resize(new_capacity);
-        capacity = new_capacity;
+        capacity = new_capacity; 
 
         for(auto &bucket : map) {
             for (const auto &[k, v] : bucket) {
-                size_t new_index = hashFunc(k);
+                size_t new_index = hashFunc(k); //rehashing after changed capacity
                 temp_map[new_index].push_back({k, v});
             }
         }
         map.clear();
-        map.shrink_to_fit();
+        map.shrink_to_fit(); //Clearing previous map
         map = std::move(temp_map);
     }
 
@@ -91,9 +92,9 @@ public:
     }
     Value& at(const Key& key) {
         size_t index = hashFunc(key);
-        for (auto &[k, v] : map[index]) {
+        for (auto &[k, value] : map[index]) {
             if (key == k) {
-                return v;
+                return value;
             }
         }
         throw std::out_of_range("Value not found");
